@@ -298,3 +298,52 @@ g <- ggplot(data.evol, aes(date,value,colour=variable)) +
 ggplotly(g)
 
 ```
+
+
+
+Locations {data-icon="fa-map-marker"}
+=====================================
+
+Column {.tabset}
+-------------------------------------
+
+### List of Top 20 cities - Online Sales 
+
+```{r}
+
+e <- ggplot(data=cityinfo2, aes(x=reorder(city,total), y=total)) +
+        geom_bar(stat="identity", colour="white", fill="black") +
+        coord_flip()+
+        theme(
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.ticks.y = element_blank())
+
+ggplotly(e)
+```
+
+### Map of Top 20 cities - Online Sales
+
+```{r}
+
+#localizo los puntos
+city_cha <- as.character(cityinfo3$city)
+lonlat <- geocode(city_cha) 
+
+#obtengo el mapa
+map <- get_map("España", source = "stamen", maptype = "toner", zoom = 5)
+
+#pinto los puntos en el mapa
+ggmap(map)+ geom_point(aes(x = lon, y = lat), data = lonlat, colour = 'red',size = 4)+
+  xlab("") + ylab("") + 
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank())
+
+```
