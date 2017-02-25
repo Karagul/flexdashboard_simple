@@ -3,7 +3,7 @@
 
 library(RGA)
 
-ga.profileId <- '104267653' #CONFORAMA
+ga.profileId <- '104267653'
 
 # Fechas
 start.date <- '2016-06-01'
@@ -34,7 +34,7 @@ write.csv(df1, file = "df1.csv")
 
 library(RGA)
 
-ga.profileId <- '104267653' #CONFORAMA
+ga.profileId <- '104267653'
 
 # Fechas
 start.date <- '2016-06-01'
@@ -65,7 +65,7 @@ write.csv(df2, file = "df2.csv")
 
 library(RGA)
 
-ga.profileId <- '104267653' #CONFORAMA
+ga.profileId <- '104267653' 
 
 # Fechas
 start.date <- '2016-06-01'
@@ -97,7 +97,7 @@ write.csv(df3, file = "df3.csv")
 
 library(RGA)
 
-ga.profileId <- '104267653' #CONFORAMA
+ga.profileId <- '104267653' 
 
 # Fechas
 start.date <- '2016-06-01'
