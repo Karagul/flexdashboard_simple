@@ -1,0 +1,244 @@
+---
+title: "BUSINESS DASHBOARD"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+#install.packages("ggplot2")
+library(ggplot2)
+library(forecast)
+library(dygraphs)
+library(knitr)
+library(zoo)
+library(plyr)
+library(dplyr)
+library(lubridate)
+library(plotly)
+#install.packages("vcd")
+library(vcd)
+#install.packages("ggmap", type = "source")
+library(ggmap)
+
+
+df1 <- read.csv("df1.csv", header=TRUE, sep=",", stringsAsFactors = default.stringsAsFactors())
+colnames(df1)
+df1$X <-NULL
+str(df1)
+df1$date <- as.Date(as.character(df1$date))
+
+sessions<- sum(df1$sessions)
+sessions <- format(sessions, big.mark=".", scientific=FALSE)
+transactions <- sum(df1$transactions)
+transactions <- format(transactions, big.mark=".", scientific=FALSE)
+
+ssbyday <- ddply(df1, .(date), summarize, total = sum(sessions))
+trbyday <- ddply(df1, .(date), summarize, total = sum(transactions))
+itemby <- ddply(df1, .(dimension1), summarize, total = sum(transactions))
+itemby <- itemby[!(apply(itemby, 1, function(y) any(y == 0))),]
+
+
+
+df2 <- read.csv("df2.csv", header=TRUE, sep=",", stringsAsFactors = default.stringsAsFactors())
+colnames(df2)
+df2$X <-NULL
+str(df2)
+df2$date <- as.Date(as.character(df2$date))
+
+cityinfo <- ddply(df2, .(city), summarize, total = sum(transactions))
+cityinfo2 <- cityinfo %>% arrange(desc(total)) %>% filter(!(city=="(not set)")) %>% top_n(20)
+
+
+df3 <- read.csv("df3.csv", header=TRUE, sep=",", stringsAsFactors = default.stringsAsFactors())
+colnames(df3)
+df3$X <-NULL
+str(df3)
+
+
+
+```
+
+Sidebar {.sidebar}
+=====================================
+
+
+Se trata de un Dashboard que pretende mostrar una visión rápida del negocio del Ecommerce X.
+
+
+Para ello, se han identificado aquellos KPIs claves y se han segmentado en función de distintos criterios.
+
+
+Fuente de datos: Google Analytics
+Rango de fechas: 01 de Enero 2016 a 31 de Diciembre de 2016
+
+
+
+
+Global {data-icon="fa-globe"} 
+===================================== 
+
+Row 
+-----------------------------------------------------------------------
+
+### Traffic 
+
+
+```{r}
+valueBox(sessions, icon = "ion-person-stalker")
+```
+
+### Sales 
+
+```{r}
+valueBox(transactions, icon = "ion-card")
+```
+
+
+
+
+Row 
+-----------------------------------------------------------------------
+
+### Traffic Evolution 
+
+```{r}
+a <- ggplot(ssbyday, aes(date, total)) + 
+        geom_line()+
+        theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank())
+
+ggplotly(a)
+
+```
+
+
+
+### Sales Evolution 
+
+```{r}
+
+b <- ggplot(trbyday, aes(date, total)) + 
+  geom_line() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank())
+
+
+ggplotly(b)
+```
+
+
+
+Row 
+-----------------------------------------------------------------------
+
+### Traffic Channel Box Plot
+
+```{r}
+
+c <- ggplot(df1, aes(x=channelGrouping, y=sessions)) +
+     geom_boxplot() +
+     coord_flip()+
+     theme(
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_blank())
+   
+
+ggplotly(c)
+```
+
+### Items by Transaction
+
+```{r}
+
+d <- ggplot(data = itemby, aes(x = total)) + 
+        geom_histogram(bins=6, colour="white", fill="black") +
+        coord_flip()+
+        theme(
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.ticks.y = element_blank())
+
+ggplotly(d)
+```
+
+Locations {data-icon="fa-map-marker"}
+=====================================
+
+Column {.tabset}
+-------------------------------------
+
+### Ranking of the 10 cities with the largest number of online sales 
+
+```{r}
+
+e <- ggplot(data=cityinfo2, aes(x=reorder(city,total), y=total)) +
+        geom_bar(stat="identity", colour="white", fill="black") +
+        coord_flip()+
+        theme(
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.ticks.y = element_blank())
+
+ggplotly(e)
+```
+
+### Map
+
+```{r}
+
+
+```
+
+Products {data-icon="fa-shopping-bag"}
+=====================================
+
+Column {.tabset}
+-------------------------------------
+
+### Product Map
+
+```{r}
+map <- get_map(location = "Europe")
+str(map)
+
+ggmap(europe)+geom_point(aes(x = lon, y = lat), data = map, colour = 'red',size = 4)
+
+```
+
+
+
+
+
+
+
